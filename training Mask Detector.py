@@ -1,10 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# ### import just do it! :p
-
-# In[2]:
-
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
@@ -28,26 +21,15 @@ import numpy as np
 import os
 
 
-# ### here is a very important step to define how much batch size and how many epochs are to be set. you can paly around with these number and find the best suitable one. PS: use these 
-
-# In[3]:
-
-
 INIT_LR = 1e-4
 EPOCHS = 20
 BS = 32
-
-
-# ### make sure you change the path to your path where datasets are saved
-
-# In[4]:
 
 
 DIRECTORY = r"C:\Users\irfan\OneDrive\Desktop\my projects\Face-Mask-Detection-master\dataset"
 CATEGORIES = ["with_mask", "without_mask"]
 
 
-# In[5]:
 
 
 # grab the list of images in our dataset directory, then initialize
@@ -58,7 +40,6 @@ data = []
 labels = []
 
 
-# In[6]:
 
 
 for category in CATEGORIES:
@@ -73,7 +54,7 @@ for category in CATEGORIES:
     	labels.append(category)
 
 
-# In[7]:
+
 
 
 # perform one-hot encoding on the labels
@@ -88,7 +69,7 @@ labels = np.array(labels)
 	test_size=0.20, stratify=labels, random_state=42)
 
 
-# In[8]:
+
 
 
 # construct the training image generator for data augmentation
@@ -102,14 +83,14 @@ aug = ImageDataGenerator(
 	fill_mode="nearest")
 
 
-# In[9]:
+
 
 
 baseModel = MobileNetV2(weights="imagenet", include_top=False,
 	input_tensor=Input(shape=(224, 224, 3)))
 
 
-# In[10]:
+
 
 
 headModel = baseModel.output
@@ -120,20 +101,14 @@ headModel = Dropout(0.5)(headModel)
 headModel = Dense(2, activation="softmax")(headModel)
 
 
-# In[11]:
 
 
 model = Model(inputs=baseModel.input, outputs=headModel)
 
 
-# In[12]:
-
 
 for layer in baseModel.layers:
 	layer.trainable = False
-
-
-# In[13]:
 
 
 # compile our model
@@ -142,10 +117,6 @@ opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
 model.compile(loss="binary_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
-
-# ## THE EXECUTION IS GONNA TAKE LONG SO BE PATIENT!
-
-# In[14]:
 
 
 print("[INFO] training head...")
@@ -157,43 +128,18 @@ H = model.fit(
 	epochs=EPOCHS)
 
 
-# In[15]:
-
 
 print("[INFO] evaluating network...")
 predIdxs = model.predict(testX, batch_size=BS)
 
-
-# In[16]:
-
-
-#for each image in the testing set we need to find the index of the
-# label with corresponding largest predicted probability
 predIdxs = np.argmax(predIdxs, axis=1)
 
-
-# In[17]:
-
-
-# show a nicely formatted classification report
 print(classification_report(testY.argmax(axis=1), predIdxs,
 	target_names=lb.classes_))
 
-
-# In[18]:
-
-
-# serialize the model to disk
 print("[INFO] saving mask detector model...")
 model.save("mask_detector.model", save_format="h5")
 
-
-# ### Here is your plot of how accurate your model is trained
-
-# In[20]:
-
-
-# plot the training loss and accuracy
 N = EPOCHS
 plt.style.use("bmh")
 plt.figure()
@@ -206,16 +152,3 @@ plt.xlabel("Epoch #")
 plt.ylabel("Loss/Accuracy")
 plt.legend(loc="lower left")
 plt.savefig("plot.png")
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
